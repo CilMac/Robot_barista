@@ -1,0 +1,36 @@
+{
+  "cafes": [
+    {
+      "id": "vergnano-100-arabica",
+      "nom": "100% Arabica",
+      "torrefacteur": "Vergnano",
+      "origine": "Blend Arabica",
+      "torrefaction": "italienne",
+      "intensite": 8,
+      "notes_torrefacteur": "Arômes de chocolat et noisette, équilibre et douceur",
+      "achete_chez": "MaxiCoffee",
+      "statut": "actuel",
+      "notes": {
+        "bianca":  { "note": null, "commentaire": "" },
+        "robot":   { "note": 16,   "commentaire": "Déjà très bon au bout de 3 jours. Manque de sirop." },
+        "v60":     { "note": null,  "commentaire": "" }
+      }
+    },
+    {
+      "id": "cosmai-il-puro",
+      "nom": "Il Puro",
+      "torrefacteur": "Cosmai Caffè",
+      "origine": "Blend Arabica",
+      "torrefaction": "italienne",
+      "intensite": 9,
+      "notes_torrefacteur": "Corsé, notes de cacao et épices douces",
+      "achete_chez": "MaxiCoffee",
+      "statut": "à tester",
+      "notes": {
+        "bianca":  { "note": null, "commentaire": "" },
+        "robot":   { "note": null, "commentaire": "" },
+        "v60":     { "note": null, "commentaire": "" }
+      }
+    }
+  ]
+}

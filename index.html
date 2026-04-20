@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robot Barista — Carnet de Ristretto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --creme:       #f5f0e8;
+    --creme-dark:  #e8e0d0;
+    --espresso:    #1a0f00;
+    --brun:        #3d2006;
+    --brun-mid:    #6b3a1f;
+    --brun-light:  #a0622a;
+    --rouge:       #8b1a1a;
+    --rouge-light: #b52a2a;
+    --or:          #c8952a;
+    --text:        #2a1500;
+    --text-light:  #6b5040;
+    --border:      #c8b8a0;
+    --shadow:      rgba(26,15,0,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--espresso);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(61,32,6,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(139,26,26,0.15) 0%, transparent 50%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--brun) 0%, var(--espresso) 60%);
+    border-bottom: 1px solid var(--brun-mid);
+    padding: 2.5rem 3rem 2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent, transparent 20px,
+      rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px
+    );
+  }
+  .header-title h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--creme);
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+  }
+  .header-title h1 em {
+    font-style: italic;
+    color: var(--or);
+  }
+  .header-title p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: #c8a070;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+  .header-icon {
+    font-size: 3.5rem;
+    opacity: 0.6;
+    filter: drop-shadow(0 2px 8px rgba(200,149,42,0.3));
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--brun);
+    border-bottom: 1px solid var(--brun-mid);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  nav button {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c8a070;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 1rem 1.6rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  nav button:hover { color: var(--creme); }
+  nav button.active {
+    color: var(--or);
+    border-bottom-color: var(--or);
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--creme);
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    padding: 1.8rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px var(--shadow);
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--brun);
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--creme-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  /* ── ROUTINE ── */
+  .routine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+  .routine-item {
+    background: var(--creme-dark);
+    border-radius: 2px;
+    padding: 0.9rem 1rem;
+    text-align: center;
+  }
+  .routine-item .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  .routine-item .value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--brun);
+    font-weight: 600;
+  }
+  .routine-item .unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-light);
+    margin-left: 0.2rem;
+  }
+  .routine-cafe {
+    background: var(--brun);
+    color: var(--creme);
+    border-radius: 2px;
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .routine-cafe .cafe-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--or);
+  }
+  .routine-cafe .cafe-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--brun-light);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .routine-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-light);
+    text-align: right;
+    margin-top: 1rem;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── SCORES DISPLAY ── */
+  .scores-row {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .score-badge {
+    background: var(--creme-dark);
+    border-radius: 2px;
+    padding: 0.5rem 0.8rem;
+    text-align: center;
+    min-width: 80px;
+  }
+  .score-badge .s-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .score-badge .s-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--brun);
+  }
+  .score-badge.highlight { background: var(--brun); }
+  .score-badge.highlight .s-label { color: var(--brun-light); }
+  .score-badge.highlight .s-val { color: var(--or); }
+
+  /* ── FORMULAIRE ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+  }
+  input, select, textarea {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    background: var(--creme-dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.55rem 0.8rem;
+    color: var(--text);
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--brun-mid);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  .optional-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--brun-light);
+    margin-left: 0.4rem;
+    font-style: italic;
+  }
+
+  .scores-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .score-input-group {
+    background: var(--creme-dark);
+    border-radius: 2px;
+    padding: 0.8rem;
+    text-align: center;
+  }
+  .score-input-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.6rem;
+  }
+  .score-input-group input {
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.3rem;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin: 1.4rem 0 0.7rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--creme-dark);
+  }
+
+  .btn-primary {
+    background: var(--brun);
+    color: var(--creme);
+    border: none;
+    border-radius: 2px;
+    padding: 0.75rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 1rem;
+  }
+  .btn-primary:hover { background: var(--rouge); }
+
+  /* ── ACTIONS HISTORIQUE ── */
+  .btn-action {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .btn-action.edit { color: var(--brun-mid); }
+  .btn-action.edit:hover { background: var(--brun); color: var(--creme); border-color: var(--brun); }
+  .btn-action.del  { color: var(--rouge); }
+  .btn-action.del:hover  { background: var(--rouge); color: var(--creme); border-color: var(--rouge); }
+
+  /* ── MODAL CONFIRMATION ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,15,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal-box {
+    background: var(--creme);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2rem;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--brun);
+    margin-bottom: 0.6rem;
+  }
+  .modal-body {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 1.4rem;
+  }
+  .modal-actions { display: flex; gap: 0.7rem; justify-content: flex-end; }
+
+  /* ── MODE ÉDITION ── */
+  .edit-mode-banner {
+    background: var(--brun);
+    color: var(--creme);
+    border-radius: 2px;
+    padding: 0.6rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .edit-mode-banner.visible { display: flex; }
+  .edit-mode-banner button {
+    background: none; border: 1px solid var(--brun-light);
+    color: var(--brun-light); border-radius: 2px;
+    padding: 0.2rem 0.6rem; font-size: 0.65rem;
+    cursor: pointer; font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .edit-mode-banner button:hover { border-color: var(--or); color: var(--or); }
+
+  /* ── GITHUB SAVE ── */
+  .github-token-block {
+    background: var(--creme-dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1rem 1.2rem;
+    margin-top: 1.4rem;
+  }
+  .github-token-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-light);
+  }
+  .github-token-toggle {
+    margin-left: auto;
+    background: var(--border);
+    border: none;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    font-size: 0.65rem;
+    cursor: pointer;
+    color: var(--text-light);
+    line-height: 18px;
+    text-align: center;
+    padding: 0;
+    transition: background 0.2s;
+  }
+  .github-token-toggle:hover { background: var(--brun-light); color: var(--creme); }
+  .github-token-help {
+    margin-top: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    line-height: 1.8;
+    color: var(--text-light);
+    border-top: 1px solid var(--border);
+    padding-top: 0.7rem;
+  }
+  .github-token-help ol {
+    margin: 0.4rem 0 0 1.2rem;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--brun-mid);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.75rem 1.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--brun-mid); color: var(--brun); }
+  .gh-feedback {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+  .gh-feedback.ok  { background: #e8f4e8; color: #2a5a2a; border: 1px solid #a0c8a0; }
+  .gh-feedback.err { background: #f4e8e8; color: #5a1a1a; border: 1px solid #c8a0a0; }
+  .gh-feedback.loading { background: var(--creme-dark); color: var(--text-light); border: 1px solid var(--border); }
+
+  /* ── JSON OUTPUT ── */
+  .json-output-wrapper {
+    display: none;
+    margin-top: 1.5rem;
+  }
+  .json-output-wrapper.visible { display: block; }
+  .json-output {
+    background: var(--espresso);
+    color: #c8b090;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    padding: 1.2rem;
+    border-radius: 2px;
+    overflow-x: auto;
+    white-space: pre;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--brun-mid);
+  }
+  .json-instructions {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-light);
+    margin-top: 0.6rem;
+    line-height: 1.6;
+  }
+  .btn-copy {
+    background: var(--or);
+    color: var(--espresso);
+    border: none;
+    border-radius: 2px;
+    padding: 0.5rem 1.2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 0.6rem;
+    transition: opacity 0.2s;
+  }
+  .btn-copy:hover { opacity: 0.85; }
+
+  /* ── HISTORIQUE ── */
+  .history-table-wrapper { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.75rem 0.8rem;
+    border-bottom: 1px solid var(--creme-dark);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--creme-dark); }
+  .td-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-light);
+    white-space: nowrap;
+  }
+  .td-cafe {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--brun);
+  }
+  .td-score {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    color: var(--brun-mid);
+    text-align: center;
+  }
+  .td-score.global { color: var(--rouge); font-size: 1rem; }
+  .td-comment {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    max-width: 220px;
+  }
+
+  /* ── COURBE ── */
+  .chart-container {
+    background: var(--creme-dark);
+    border-radius: 2px;
+    padding: 1.2rem;
+    margin-top: 0;
+    overflow: hidden;
+  }
+  canvas { max-width: 100%; }
+
+  /* ── BIBLIOTHÈQUE CAFÉS ── */
+  .cafes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+  }
+  .cafe-card {
+    background: var(--creme);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .cafe-card-header {
+    background: var(--brun);
+    padding: 1rem 1.2rem;
+  }
+  .cafe-card-header .torrefacteur {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--brun-light);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .cafe-card-header .nom {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--creme);
+  }
+  .cafe-card-body { padding: 1rem 1.2rem; }
+  .cafe-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-light);
+    margin-bottom: 0.8rem;
+    line-height: 1.7;
+  }
+  .intensite-bar {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 0.8rem;
+  }
+  .intensite-pip {
+    width: 16px; height: 6px;
+    border-radius: 1px;
+    background: var(--creme-dark);
+  }
+  .intensite-pip.on { background: var(--brun-mid); }
+  .cafe-scores-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--creme-dark);
+    padding-top: 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .cafe-score-chip {
+    background: var(--creme-dark);
+    border-radius: 2px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.72rem;
+  }
+  .cafe-score-chip .machine {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-light);
+  }
+  .cafe-score-chip .note {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    color: var(--brun);
+    margin-left: 0.3rem;
+  }
+  .cafe-score-chip.robot { background: var(--brun); }
+  .cafe-score-chip.robot .machine { color: var(--brun-light); }
+  .cafe-score-chip.robot .note { color: var(--or); }
+  .statut-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .statut-actuel { background: var(--rouge); color: var(--creme); }
+  .statut-tester { background: var(--creme-dark); color: var(--text-light); border: 1px solid var(--border); }
+
+  /* ── MATÉRIEL ── */
+  .materiel-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c8a070;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(200,160,112,0.25);
+  }
+  .machine-card {
+    background: var(--creme);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px var(--shadow);
+    margin-bottom: 1.5rem;
+  }
+  .machine-card-header {
+    background: linear-gradient(90deg, var(--brun) 0%, var(--brun-mid) 100%);
+    padding: 1.2rem 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .machine-card-header .machine-icon {
+    font-size: 2.2rem;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+  .machine-card-header .machine-title-block { flex: 1; }
+  .machine-card-header .machine-brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #c8a070;
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .machine-card-header .machine-name {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--creme);
+    line-height: 1.2;
+  }
+  .machine-card-header .machine-role {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--or);
+    color: var(--espresso);
+    border-radius: 10px;
+    padding: 0.25rem 0.7rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .machine-card-body {
+    padding: 1.4rem 1.6rem;
+  }
+  .machine-desc {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: #3d2006;
+    margin-bottom: 1.2rem;
+  }
+  .machine-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+  .spec-chip {
+    background: var(--creme-dark);
+    border-radius: 2px;
+    padding: 0.6rem 0.8rem;
+  }
+  .spec-chip .spec-k {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.57rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .spec-chip .spec-v {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.92rem;
+    color: var(--brun);
+    font-weight: 600;
+  }
+  .machine-notes {
+    border-top: 1px solid var(--creme-dark);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+  }
+  .machine-note-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #3d2006;
+  }
+  .machine-note-item .note-dot {
+    flex-shrink: 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--or);
+    margin-top: 0.4rem;
+  }
+  .machine-note-item .note-dot.red { background: var(--rouge); }
+  .machine-note-item .note-dot.green { background: #5a8a3a; }
+
+  .machine-vs {
+    background: var(--espresso);
+    border: 1px solid var(--brun-mid);
+    border-radius: 3px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .machine-vs-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--or);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .vs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  .vs-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c8a070;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--brun-mid);
+    text-align: left;
+  }
+  .vs-table td {
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: #c8b090;
+    vertical-align: top;
+  }
+  .vs-table td:first-child {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c8a070;
+    white-space: nowrap;
+  }
+  .vs-table tr:last-child td { border-bottom: none; }
+  .vs-table tr:hover td { background: rgba(255,255,255,0.03); }
+  .vs-ok { color: #7ec878 !important; }
+  .vs-warn { color: var(--or) !important; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-light);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 1.5rem; }
+    .header-title h1 { font-size: 1.5rem; }
+    main { padding: 1.2rem 1rem 3rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+    .scores-form-grid { grid-template-columns: repeat(2, 1fr); }
+    .routine-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>Robot Barista<br><em>Carnet de Ristretto</em></h1>
+    <p>Cafelat Robot · Eureka Mignon SD · Wakako Exagram</p>
+  </div>
+  <div class="header-icon">☕</div>
+</header>
+
+<nav>
+  <button class="active" onclick="showSection('routine', this)">① Routine</button>
+  <button onclick="showSection('session', this)">② Nouvelle session</button>
+  <button onclick="showSection('historique', this)">③ Historique</button>
+  <button onclick="showSection('cafes', this)">④ Cafés</button>
+  <button onclick="showSection('materiel', this)">⑤ Matériel</button>
+</nav>
+
+<div id="app-loader" style="display:flex;align-items:center;justify-content:center;min-height:40vh">
+  <div style="text-align:center;font-family:'DM Mono',monospace;font-size:0.75rem;color:#c8a070;letter-spacing:0.1em">
+    <div style="font-size:2rem;margin-bottom:1rem;animation:spin 1.5s linear infinite;display:inline-block">☕</div>
+    <div>Chargement des données…</div>
+  </div>
+</div>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
+<main id="app-main" style="display:none">
+
+  <!-- ① ROUTINE ACTUELLE -->
+  <div id="routine" class="section active">
+    <div class="card" id="routine-card">
+      <div class="card-title">☕ Routine actuelle <span style="font-size:0.7rem;font-family:'DM Mono',monospace;color:var(--text-light);font-weight:300;margin-left:auto">déduite de la dernière session</span></div>
+      <div id="routine-content"><p class="empty-state">Aucune session enregistrée.</p></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Notes de terrain</div>
+      <div style="font-size:0.85rem;line-height:1.8;color:var(--text-light);">
+        <p><strong style="color:var(--brun);font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;">Ce qui fonctionne</strong><br>
+        Pression 6–7 bars · Dose IN 18 g · Tasses préchauffées · Eau Volvic</p>
+        <p style="margin-top:0.8rem"><strong style="color:var(--rouge);font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;">À explorer</strong><br>
+        Température (bouilloire Stagg en route) · Tassage · Mouture · Nouveaux grains</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SUPPRESSION -->
+  <div class="modal-overlay" id="modal-del">
+    <div class="modal-box">
+      <div class="modal-title">🗑 Supprimer cette session ?</div>
+      <div class="modal-body" id="modal-del-body"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal()">Annuler</button>
+        <button class="btn-primary" style="background:var(--rouge);margin-top:0" onclick="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② NOUVELLE SESSION -->
+  <div id="session" class="section">
+    <div class="card">
+      <div class="edit-mode-banner" id="edit-banner">
+        <span>✏ Mode édition — Session <span id="edit-session-id"></span></span>
+        <button onclick="cancelEdit()">✕ Annuler</button>
+      </div>
+      <div class="card-title">＋ Enregistrer une extraction</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="form-group">
+          <label>Café</label>
+          <select id="f-cafe"></select>
+        </div>
+      </div>
+
+      <p class="section-label">Paramètres d'extraction</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Dose IN <span class="optional-tag">g</span></label>
+          <input type="number" id="f-in" value="18" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Dose OUT <span class="optional-tag">g</span></label>
+          <input type="number" id="f-out" value="25" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>Temps total <span class="optional-tag">sec</span></label>
+          <input type="number" id="f-temps" value="35">
+        </div>
+        <div class="form-group">
+          <label>Pré-infusion</label>
+          <select id="f-preinf-mode" onchange="togglePreinfMode()">
+            <option value="secondes">En secondes</option>
+            <option value="gouttes">Premières gouttes</option>
+          </select>
+        </div>
+        <div class="form-group" id="preinf-sec-group">
+          <label>Durée pré-infusion <span class="optional-tag">sec</span></label>
+          <input type="number" id="f-preinf" value="10">
+        </div>
+        <div class="form-group" id="preinf-gouttes-group" style="display:none">
+          <label>Nb de gouttes <span class="optional-tag">optionnel</span></label>
+          <input type="number" id="f-preinf-gouttes" placeholder="ex: 3" min="1">
+        </div>
+        <div class="form-group">
+          <label>Pression <span class="optional-tag">bars</span></label>
+          <input type="number" id="f-pression" value="6.5" step="0.5">
+        </div>
+        <div class="form-group">
+          <label>Température</label>
+          <select id="f-temp-mode" onchange="toggleTempMode()">
+            <option value="bouillante2mn">Eau bouillante après 2 mn</option>
+            <option value="celsius">Valeur °C</option>
+          </select>
+        </div>
+        <div class="form-group" id="temp-celsius-group" style="display:none">
+          <label>Température <span class="optional-tag">°C</span></label>
+          <input type="number" id="f-temp" placeholder="ex: 93" step="0.5">
+        </div>
+        <div class="form-group">
+          <label>Moulin</label>
+          <select id="f-moulin">
+            <option value="Eureka Mignon SD" selected>Eureka Mignon SD (électrique)</option>
+            <option value="Kinu M47">Kinu M47 (manuel)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Réglage mouture <span class="optional-tag">1.0 → 10.0</span></label>
+          <input type="number" id="f-reglage" value="3.0" min="1" max="10" step="0.1">
+        </div>
+      </div>
+
+      <p class="section-label">Scores <span class="optional-tag">sur 20</span></p>
+      <div class="scores-form-grid">
+        <div class="score-input-group">
+          <label>Onctuosité</label>
+          <input type="number" id="f-onctuosite" min="0" max="20" value="13">
+        </div>
+        <div class="score-input-group">
+          <label>Crema</label>
+          <input type="number" id="f-crema" min="0" max="20" value="13">
+        </div>
+        <div class="score-input-group">
+          <label>Goût</label>
+          <input type="number" id="f-gout" min="0" max="20" value="16">
+        </div>
+        <div class="score-input-group">
+          <label>Global</label>
+          <input type="number" id="f-global" min="0" max="20" value="16">
+        </div>
+      </div>
+
+      <p class="section-label">Commentaire</p>
+      <div class="form-group full">
+        <textarea id="f-comment" placeholder="Observations, paramètres à tester, impressions…"></textarea>
+      </div>
+
+      <!-- TOKEN GITHUB -->
+      <div class="github-token-block" id="github-token-block">
+        <div class="github-token-header">
+          <span class="github-token-icon">🔑</span>
+          <span>GitHub Personal Access Token</span>
+          <button class="github-token-toggle" onclick="toggleTokenHelp()" id="token-help-btn">?</button>
+        </div>
+        <div class="github-token-help" id="token-help" style="display:none">
+          <p>Générer une seule fois sur GitHub :</p>
+          <ol>
+            <li>github.com → Settings → Developer settings</li>
+            <li>Personal access tokens → Tokens (classic)</li>
+            <li>Generate new token → scope <strong>repo</strong> uniquement</li>
+            <li>Coller ci-dessous — mémorisé jusqu'à fermeture du navigateur</li>
+          </ol>
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:center;margin-top:0.6rem">
+          <input type="password" id="github-pat" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                 style="flex:1;font-family:'DM Mono',monospace;font-size:0.78rem"
+                 oninput="savePAT(this.value)">
+          <span id="pat-status" style="font-family:'DM Mono',monospace;font-size:0.7rem;white-space:nowrap;color:var(--text-light)"></span>
+        </div>
+        <div style="margin-top:0.5rem;display:flex;gap:0.8rem;align-items:center">
+          <input type="text" id="github-repo" placeholder="cilmac/robot-barista"
+                 style="font-family:'DM Mono',monospace;font-size:0.78rem;width:220px"
+                 oninput="saveRepo(this.value)">
+          <label style="font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin:0">Repo (user/nom)</label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.8rem;margin-top:1.2rem;flex-wrap:wrap">
+        <button class="btn-primary" onclick="saveToGitHub()" id="btn-save-gh">
+          ↑ Sauvegarder sur GitHub
+        </button>
+        <button class="btn-secondary" onclick="generateJSON()">Voir le JSON</button>
+      </div>
+
+      <!-- Feedback -->
+      <div id="gh-feedback" class="gh-feedback" style="display:none"></div>
+
+      <!-- JSON optionnel (repli) -->
+      <div class="json-output-wrapper" id="json-wrapper">
+        <p class="section-label">JSON généré</p>
+        <div class="json-output" id="json-output"></div>
+        <button class="btn-copy" onclick="copyJSON()">Copier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ HISTORIQUE -->
+  <div id="historique" class="section">
+    <div class="card">
+      <div class="card-title">📈 Progression</div>
+      <div class="chart-container">
+        <canvas id="chart" height="200"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗂 Toutes les sessions</div>
+      <div class="history-table-wrapper">
+        <table id="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Café</th>
+              <th>IN→OUT</th>
+              <th>Tps</th>
+              <th>Bar</th>
+              <th>°C</th>
+              <th>Onct.</th>
+              <th>Crema</th>
+              <th>Goût</th>
+              <th>Global</th>
+              <th>Commentaire</th>
+              <th style="text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ CAFÉS -->
+  <div id="cafes" class="section">
+    <div class="card">
+      <div class="card-title">☕ Bibliothèque des cafés testés</div>
+      <div class="cafes-grid" id="cafes-grid"></div>
+    </div>
+  </div>
+
+  <!-- ⑤ MATÉRIEL -->
+  <div id="materiel" class="section">
+
+    <p class="materiel-section-title">★ Machine espresso</p>
+
+    <!-- CAFELAT ROBOT -->
+    <div class="machine-card">
+      <div class="machine-card-header">
+        <div class="machine-icon">🤖</div>
+        <div class="machine-title-block">
+          <span class="machine-brand">Cafelat</span>
+          <div class="machine-name">Robot Barista</div>
+        </div>
+        <span class="machine-role">Machine principale</span>
+      </div>
+      <div class="machine-card-body">
+        <div class="machine-desc">
+          Machine à levier <strong>manuel</strong> à piston — dite "lever espresso". Pas de pompe, pas de chaudière, pas d'électronique. L'eau est versée chaude depuis la bouilloire dans le groupe, puis la pression est créée entièrement à la main via le levier. Cette simplicité extrême donne un contrôle total sur le profil de pression, et une durabilité sans égale.
+        </div>
+        <div class="machine-specs">
+          <div class="spec-chip"><span class="spec-k">Type</span><span class="spec-v">Levier manuel</span></div>
+          <div class="spec-chip"><span class="spec-k">Pression</span><span class="spec-v">0 → ~10 bar</span></div>
+          <div class="spec-chip"><span class="spec-k">Chaudière</span><span class="spec-v">Aucune</span></div>
+          <div class="spec-chip"><span class="spec-k">Température</span><span class="spec-v">Bouilloire externe</span></div>
+          <div class="spec-chip"><span class="spec-k">Profil pression</span><span class="spec-v">Manuel / libre</span></div>
+          <div class="spec-chip"><span class="spec-k">Entartrage</span><span class="spec-v">Zéro risque</span></div>
+        </div>
+        <div class="machine-notes">
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Profil de pression entièrement maîtrisable : montée douce en pré-infusion, maintien plateau, descente finale</span></div>
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Aucune chauffe à attendre — prête en 1 minute (rinçage du groupe)</span></div>
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Maintenance quasi-nulle, durée de vie décennale</span></div>
+          <div class="machine-note-item"><span class="note-dot"></span><span>La température dépend entièrement de la bouilloire — la Stagg EKG Pro au degré près sera un vrai gain</span></div>
+          <div class="machine-note-item"><span class="note-dot"></span><span>Filtre pressurisé disponible pour café prémoulu ou déca — pas encore testé</span></div>
+          <div class="machine-note-item"><span class="note-dot red"></span><span>La pression est estimée au toucher (levier) — un manomètre d'adaptation existe mais n'est pas indispensable</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LELIT BIANCA -->
+    <div class="machine-card" style="opacity:0.88">
+      <div class="machine-card-header" style="background: linear-gradient(90deg, #1a3a2a 0%, #2d5a3d 100%)">
+        <div class="machine-icon">☕</div>
+        <div class="machine-title-block">
+          <span class="machine-brand">Lelit</span>
+          <div class="machine-name">Bianca V3</div>
+        </div>
+        <span class="machine-role" style="background:#2d8a5a">Référence</span>
+      </div>
+      <div class="machine-card-body">
+        <div class="machine-desc">
+          Machine <strong>double chaudière</strong> à pompe avec contrôle de profil de pression électronique (paddle de by-pass). L'une des meilleures machines semi-auto du marché dans sa catégorie — référence absolue pour comparer les résultats avec le Robot.
+        </div>
+        <div class="machine-specs">
+          <div class="spec-chip"><span class="spec-k">Type</span><span class="spec-v">Pompe / E61</span></div>
+          <div class="spec-chip"><span class="spec-k">Pression</span><span class="spec-v">9 bar (réglable)</span></div>
+          <div class="spec-chip"><span class="spec-k">Chaudière</span><span class="spec-v">Double (café + vapeur)</span></div>
+          <div class="spec-chip"><span class="spec-k">Température</span><span class="spec-v">PID au degré</span></div>
+          <div class="spec-chip"><span class="spec-k">Profil pression</span><span class="spec-v">Paddle manuel</span></div>
+          <div class="spec-chip"><span class="spec-k">Entartrage</span><span class="spec-v">Entretien régulier</span></div>
+        </div>
+        <div class="machine-notes">
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Température PID ultra-stable — avantage décisif pour la répétabilité</span></div>
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Vapeur puissante pour le lait (hors sujet ristretto, mais tout de même...)</span></div>
+          <div class="machine-note-item"><span class="note-dot red"></span><span>20–25 min de chauffe · entretien régulier · encombrement et prix importants</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- V60 — autre univers -->
+    <div class="machine-card" style="opacity:0.82;border-style:dashed">
+      <div class="machine-card-header" style="background: linear-gradient(90deg, #2a2a1a 0%, #4a4520 100%)">
+        <div class="machine-icon">🫗</div>
+        <div class="machine-title-block">
+          <span class="machine-brand">Hario</span>
+          <div class="machine-name">V60</div>
+        </div>
+        <span class="machine-role" style="background:#6a6020;font-size:0.55rem;opacity:0.9">Autre univers</span>
+      </div>
+      <div class="machine-card-body">
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--brun-light);margin-bottom:0.8rem;font-style:italic">
+          ✦ Hors-sujet revendiqué — mais fait partie du parc
+        </div>
+        <div class="machine-desc">
+          Le V60 est un <strong>filtre à percolation par gravité</strong> — philosophie radicalement opposée à l'espresso. Pas de pression : l'eau chaude traverse lentement le café moulu grossièrement, entraînant les arômes par simple gravité à travers un filtre papier conique. Résultat : une tasse claire, nette, sans corps ni crema — mais d'une complexité aromatique remarquable quand le café s'y prête.
+        </div>
+        <div class="machine-specs">
+          <div class="spec-chip"><span class="spec-k">Type</span><span class="spec-v">Percolation gravité</span></div>
+          <div class="spec-chip"><span class="spec-k">Pression</span><span class="spec-v">Aucune (1 bar atm)</span></div>
+          <div class="spec-chip"><span class="spec-k">Filtre</span><span class="spec-v">Papier conique</span></div>
+          <div class="spec-chip"><span class="spec-k">Ratio typique</span><span class="spec-v">1:15 (ex. 15g→225g)</span></div>
+          <div class="spec-chip"><span class="spec-k">Mouture</span><span class="spec-v">Grossière (vs espresso)</span></div>
+          <div class="spec-chip"><span class="spec-k">Temps</span><span class="spec-v">2 min 30 – 3 min 30</span></div>
+        </div>
+        <div class="machine-notes">
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Révèle les notes fines et florales qu'un espresso écrase parfois — idéal pour explorer un nouveau grain</span></div>
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Zéro matériel électrique · entretien nul · transportable</span></div>
+          <div class="machine-note-item"><span class="note-dot"></span><span>La technique de versé (spirale, vitesse, température ~93°C) influence beaucoup le résultat — tout aussi artisanal que le Robot</span></div>
+          <div class="machine-note-item"><span class="note-dot red"></span><span>Pas de crema, pas de sirop, pas d'espresso — une autre boisson, presque un autre sport</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="materiel-section-title">★ Mouture</p>
+
+    <!-- EUREKA MIGNON SD -->
+    <div class="machine-card">
+      <div class="machine-card-header">
+        <div class="machine-icon">⚙️</div>
+        <div class="machine-title-block">
+          <span class="machine-brand">Eureka</span>
+          <div class="machine-name">Mignon SD</div>
+        </div>
+        <span class="machine-role">Moulin actif</span>
+      </div>
+      <div class="machine-card-body">
+        <div class="machine-desc">
+          Moulin électrique à meules plates 50 mm avec <em>Single Dose</em> — conçu pour moudre à la demande, dose par dose, sans café résiduel dans la trémie. Réglage de mouture par vis micrométrique continue. Associé au <strong>WDT</strong> (Weiss Distribution Technique) pour homogénéiser les grains dans le filtre avant tassage.
+        </div>
+        <div class="machine-specs">
+          <div class="spec-chip"><span class="spec-k">Type</span><span class="spec-v">Électrique, meules plates</span></div>
+          <div class="spec-chip"><span class="spec-k">Diamètre meules</span><span class="spec-v">50 mm</span></div>
+          <div class="spec-chip"><span class="spec-k">Réglage</span><span class="spec-v">Continu (vis micro)</span></div>
+          <div class="spec-chip"><span class="spec-k">Mode</span><span class="spec-v">Single Dose</span></div>
+          <div class="spec-chip"><span class="spec-k">Rétention</span><span class="spec-v">Très faible</span></div>
+          <div class="spec-chip"><span class="spec-k">WDT</span><span class="spec-v">Oui — avant tassage</span></div>
+        </div>
+        <div class="machine-notes">
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Single dose = fraîcheur maximale — on moud exactement 18 g, pas un gramme de plus</span></div>
+          <div class="machine-note-item"><span class="note-dot green"></span><span>Le WDT déstructure les canaux et touffes avant tassage — impact direct sur l'onctuosité</span></div>
+          <div class="machine-note-item"><span class="note-dot"></span><span>Réglage actuel : 3.0 — zone espresso fin pour le Robot (6–7 bar)</span></div>
+          <div class="machine-note-item"><span class="note-dot red"></span><span>Pour plus de sirop : essayer d'affiner légèrement (2.8–2.7) en surveillant le temps d'extraction</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="materiel-section-title">★ Pesée & Température</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-bottom:1.5rem">
+
+      <!-- WAKAKO EXAGRAM -->
+      <div class="machine-card" style="margin-bottom:0">
+        <div class="machine-card-header">
+          <div class="machine-icon">⚖️</div>
+          <div class="machine-title-block">
+            <span class="machine-brand">Wakako</span>
+            <div class="machine-name">Exagram</div>
+          </div>
+          <span class="machine-role" style="font-size:0.55rem">Balance</span>
+        </div>
+        <div class="machine-card-body">
+          <div class="machine-desc" style="margin-bottom:0.8rem">Balance de précision espresso avec minuterie intégrée. Résolution 0,1 g — indispensable pour piloter le ratio IN/OUT avec rigueur.</div>
+          <div class="machine-specs" style="grid-template-columns:1fr 1fr">
+            <div class="spec-chip"><span class="spec-k">Résolution</span><span class="spec-v">0,1 g</span></div>
+            <div class="spec-chip"><span class="spec-k">Timer</span><span class="spec-v">Intégré</span></div>
+            <div class="spec-chip"><span class="spec-k">Usage</span><span class="spec-v">IN + OUT</span></div>
+            <div class="spec-chip"><span class="spec-k">Ratio actuel</span><span class="spec-v">18g → 25g</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAGG EKG PRO -->
+      <div class="machine-card" style="margin-bottom:0">
+        <div class="machine-card-header" style="background: linear-gradient(90deg, #1a2a3a 0%, #2d4a5a 100%)">
+          <div class="machine-icon">🫖</div>
+          <div class="machine-title-block">
+            <span class="machine-brand">Fellow</span>
+            <div class="machine-name">Stagg EKG Pro</div>
+          </div>
+          <span class="machine-role" style="background:#2d6a8a;font-size:0.55rem">Bouilloire</span>
+        </div>
+        <div class="machine-card-body">
+          <div class="machine-desc" style="margin-bottom:0.8rem">Bouilloire à col de cygne réglable au degré. Version <em>vert fumé</em> — en cours de livraison. Changera radicalement la précision de température, actuellement le principal paramètre non maîtrisé.</div>
+          <div class="machine-specs" style="grid-template-columns:1fr 1fr">
+            <div class="spec-chip"><span class="spec-k">Précision</span><span class="spec-v">±1°C</span></div>
+            <div class="spec-chip"><span class="spec-k">Col de cygne</span><span class="spec-v">Oui</span></div>
+            <div class="spec-chip"><span class="spec-k">Statut</span><span class="spec-v" style="color:var(--rouge)">En attente</span></div>
+            <div class="spec-chip"><span class="spec-k">Cible Robot</span><span class="spec-v">91–93°C</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TABLEAU COMPARATIF ROBOT vs BIANCA -->
+    <div class="machine-vs">
+      <div class="machine-vs-title">⚖ Robot Barista vs Lelit Bianca — ce qui diffère</div>
+      <table class="vs-table">
+        <thead>
+          <tr>
+            <th>Paramètre</th>
+            <th>Robot Barista</th>
+            <th>Lelit Bianca</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pression</td>
+            <td class="vs-ok">Manuel, variable 0→10 bar</td>
+            <td>Pompe 9 bar + paddle</td>
+            <td>Profil plus libre sur le Robot</td>
+          </tr>
+          <tr>
+            <td>Température</td>
+            <td class="vs-warn">Bouilloire (imprécis actuellement)</td>
+            <td class="vs-ok">PID au degré</td>
+            <td>⚡ Point critique à résoudre avec la Stagg</td>
+          </tr>
+          <tr>
+            <td>Pré-infusion</td>
+            <td class="vs-ok">Naturelle, gérée par le levier</td>
+            <td>Paddle ou minuterie</td>
+            <td>Avantage Robot pour la douceur</td>
+          </tr>
+          <tr>
+            <td>Répétabilité</td>
+            <td class="vs-warn">Dépend du geste</td>
+            <td class="vs-ok">Très élevée</td>
+            <td>Apprentissage tactile nécessaire</td>
+          </tr>
+          <tr>
+            <td>Chauffe</td>
+            <td class="vs-ok">~1 min (rinçage groupe)</td>
+            <td>20–25 min</td>
+            <td>Avantage Robot pour le quotidien</td>
+          </tr>
+          <tr>
+            <td>Entartrage</td>
+            <td class="vs-ok">Zéro (eau bouilloire)</td>
+            <td>Entretien régulier</td>
+            <td>Avantage Robot</td>
+          </tr>
+          <tr>
+            <td>Sirop / Onctuosité</td>
+            <td class="vs-warn">En cours d'optimisation</td>
+            <td class="vs-ok">Référence</td>
+            <td>L'objectif du carnet !</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ── DATA — chargées dynamiquement depuis GitHub ───────────────────────────────
+var CAFES_DATA    = { cafes: [] };
+var SESSIONS_DATA = { sessions: [] };
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+// Décodage base64 → UTF-8 correct (GitHub API encode en UTF-8 puis base64)
+function b64decode(str) {
+  var bin = atob(str.replace(/\n/g, ''));
+  var bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+function getCafe(id) {
+  return CAFES_DATA.cafes.find(function(c) { return c.id === id; }) || null;
+}
+function formatDate(d) {
+  var parts = d.split('-');
+  return parts[2] + '/' + parts[1] + '/' + parts[0];
+}
+function scoreColor(n) {
+  if (n === null) return 'var(--text-light)';
+  if (n >= 17) return 'var(--or)';
+  if (n >= 15) return 'var(--brun-mid)';
+  return 'var(--rouge)';
+}
+
+// ── SECTION SWITCHER ─────────────────────────────────────────────────────────
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'historique') drawChart();
+}
+
+// ── ① ROUTINE ────────────────────────────────────────────────────────────────
+function renderRoutine() {
+  var sessions = SESSIONS_DATA.sessions;
+  var el = document.getElementById('routine-content');
+  if (!sessions || !sessions.length) return;
+
+  var last = sessions[sessions.length - 1];
+  var cafe = getCafe(last.cafe_id);
+  var cafeName = cafe ? (cafe.torrefacteur + ' — ' + cafe.nom) : last.cafe_id;
+  var cafeInfo = cafe ? (cafe.torrefaction.toUpperCase() + '<br>' + cafe.origine) : '';
+
+  var preinfHTML;
+  if (last.preinfusion_mode === 'premières gouttes') {
+    var nb = last.preinfusion ? ' (' + last.preinfusion + ')' : '';
+    preinfHTML = '<span style="font-size:0.72rem">premières gouttes' + nb + '</span>';
+  } else {
+    preinfHTML = (last.preinfusion || '—') + '<span class="unit">s</span>';
+  }
+
+  var tempHTML;
+  if (last.temperature !== null && last.temperature !== undefined) {
+    tempHTML = last.temperature + '<span class="unit">°C</span>';
+  } else {
+    tempHTML = '<span style="font-size:0.7rem;color:var(--text-light)">' + (last.temperature_note || '—') + '</span>';
+  }
+
+  var moulinHTML = '<span style="font-size:0.72rem">' + (last.moulin || last.mouture || '—') + '</span>';
+  var reglageHTML = (last.reglage_mouture !== undefined && last.reglage_mouture !== null) ? last.reglage_mouture : (last.mouture || '—');
+
+  el.innerHTML =
+    '<div class="routine-cafe">' +
+      '<div>' +
+        '<span class="cafe-sub">Café en cours</span>' +
+        '<div class="cafe-name">' + cafeName + '</div>' +
+      '</div>' +
+      '<div style="font-family:DM Mono,monospace;font-size:0.62rem;color:var(--brun-light);text-align:right;">' + cafeInfo + '</div>' +
+    '</div>' +
+    '<div class="routine-grid">' +
+      '<div class="routine-item"><span class="label">Dose IN</span><span class="value">' + last.dose_in + '<span class="unit">g</span></span></div>' +
+      '<div class="routine-item"><span class="label">Dose OUT</span><span class="value">' + last.dose_out + '<span class="unit">g</span></span></div>' +
+      '<div class="routine-item"><span class="label">Ratio</span><span class="value">1:' + (last.dose_out/last.dose_in).toFixed(1) + '</span></div>' +
+      '<div class="routine-item"><span class="label">Temps total</span><span class="value">' + last.temps_total + '<span class="unit">s</span></span></div>' +
+      '<div class="routine-item"><span class="label">Pré-infusion</span><span class="value">' + preinfHTML + '</span></div>' +
+      '<div class="routine-item"><span class="label">Pression</span><span class="value">' + last.pression + '<span class="unit">bar</span></span></div>' +
+      '<div class="routine-item"><span class="label">Température</span><span class="value">' + tempHTML + '</span></div>' +
+      '<div class="routine-item"><span class="label">Moulin</span><span class="value">' + moulinHTML + '</span></div>' +
+      '<div class="routine-item"><span class="label">Réglage</span><span class="value">' + reglageHTML + '</span></div>' +
+    '</div>' +
+    '<div class="scores-row">' +
+      '<div class="score-badge"><span class="s-label">Onctuosité</span><span class="s-val" style="color:' + scoreColor(last.scores.onctuosite) + '">' + last.scores.onctuosite + '</span></div>' +
+      '<div class="score-badge"><span class="s-label">Crema</span><span class="s-val" style="color:' + scoreColor(last.scores.crema) + '">' + last.scores.crema + '</span></div>' +
+      '<div class="score-badge"><span class="s-label">Goût</span><span class="s-val" style="color:' + scoreColor(last.scores.gout) + '">' + last.scores.gout + '</span></div>' +
+      '<div class="score-badge highlight"><span class="s-label">Global</span><span class="s-val">' + last.scores.global + '</span></div>' +
+    '</div>' +
+    '<p class="routine-date">Dernière session : ' + formatDate(last.date) + '</p>';
+}
+
+// ── ② FORMULAIRE ─────────────────────────────────────────────────────────────
+function togglePreinfMode() {
+  var mode = document.getElementById('f-preinf-mode').value;
+  document.getElementById('preinf-sec-group').style.display     = (mode === 'secondes') ? '' : 'none';
+  document.getElementById('preinf-gouttes-group').style.display = (mode === 'gouttes')  ? '' : 'none';
+}
+
+function toggleTempMode() {
+  var mode = document.getElementById('f-temp-mode').value;
+  document.getElementById('temp-celsius-group').style.display = (mode === 'celsius') ? '' : 'none';
+}
+
+function initForm() {
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  var sel = document.getElementById('f-cafe');
+  CAFES_DATA.cafes.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.torrefacteur + ' — ' + c.nom;
+    sel.appendChild(opt);
+  });
+}
+
+// ── GITHUB CONFIG ────────────────────────────────────────────────────────────
+var GH_BRANCH = 'main';
+
+function savePAT(v) {
+  sessionStorage.setItem('gh_pat', v);
+  document.getElementById('pat-status').textContent = v.length > 10 ? '✓ mémorisé' : '';
+}
+function saveRepo(v) {
+  sessionStorage.setItem('gh_repo', v);
+}
+function loadGHConfig() {
+  var pat  = sessionStorage.getItem('gh_pat')  || '';
+  var repo = sessionStorage.getItem('gh_repo') || '';
+  if (pat)  { document.getElementById('github-pat').value  = pat;  document.getElementById('pat-status').textContent = '✓ mémorisé'; }
+  if (repo) { document.getElementById('github-repo').value = repo; }
+}
+function toggleTokenHelp() {
+  var el = document.getElementById('token-help');
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function buildSession() {
+  var tempMode = document.getElementById('f-temp-mode').value;
+  var tempField = document.getElementById('f-temp');
+  var tempVal = tempField ? tempField.value : '';
+  var temperature, temperature_note;
+  if (tempMode === 'bouillante2mn') {
+    temperature = null;
+    temperature_note = 'eau bouillante après 2 mn';
+  } else {
+    temperature = tempVal ? parseFloat(tempVal) : null;
+    temperature_note = null;
+  }
+  var preinfMode = document.getElementById('f-preinf-mode').value;
+  var preinfusion, preinfusion_mode;
+  if (preinfMode === 'gouttes') {
+    preinfusion_mode = 'premières gouttes';
+    var g = document.getElementById('f-preinf-gouttes').value;
+    preinfusion = g ? parseInt(g) : null;
+  } else {
+    preinfusion_mode = 'secondes';
+    preinfusion = parseInt(document.getElementById('f-preinf').value);
+  }
+  return {
+    id: SESSIONS_DATA.sessions.length + 1,
+    date: document.getElementById('f-date').value,
+    cafe_id: document.getElementById('f-cafe').value,
+    dose_in: parseFloat(document.getElementById('f-in').value),
+    dose_out: parseFloat(document.getElementById('f-out').value),
+    temps_total: parseInt(document.getElementById('f-temps').value),
+    preinfusion_mode: preinfusion_mode,
+    preinfusion: preinfusion,
+    pression: parseFloat(document.getElementById('f-pression').value),
+    temperature: temperature,
+    temperature_note: temperature_note,
+    moulin: document.getElementById('f-moulin').value,
+    reglage_mouture: parseFloat(document.getElementById('f-reglage').value),
+    commentaire: document.getElementById('f-comment').value,
+    scores: {
+      onctuosite: parseInt(document.getElementById('f-onctuosite').value),
+      crema:      parseInt(document.getElementById('f-crema').value),
+      gout:       parseInt(document.getElementById('f-gout').value),
+      global:     parseInt(document.getElementById('f-global').value)
+    }
+  };
+}
+
+function generateJSON() {
+  var session = buildSession();
+  var wrapper = document.getElementById('json-wrapper');
+  var output  = document.getElementById('json-output');
+  output.textContent = JSON.stringify(session, null, 2);
+  wrapper.classList.add('visible');
+  wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function setFeedback(msg, type) {
+  var el = document.getElementById('gh-feedback');
+  el.textContent = msg;
+  el.className = 'gh-feedback ' + type;
+  el.style.display = '';
+}
+
+async function saveToGitHub() {
+  var pat  = document.getElementById('github-pat').value.trim();
+  var repo = document.getElementById('github-repo').value.trim();
+  if (!pat)  { setFeedback('⚠ Token PAT manquant — coller ton token ci-dessus.', 'err'); return; }
+  if (!repo) { setFeedback('⚠ Nom du repo manquant — ex: cilmac/robot-barista', 'err'); return; }
+
+  var session = buildSession();
+  var btn = document.getElementById('btn-save-gh');
+  btn.disabled = true;
+  btn.textContent = '… envoi en cours';
+  setFeedback('⏳ Lecture de sessions.json sur GitHub…', 'loading');
+
+  var apiBase = 'https://api.github.com/repos/' + repo + '/contents/sessions.json';
+  var headers  = { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+
+  try {
+    // 1 — Lire le fichier actuel pour récupérer son SHA
+    var getResp = await fetch(apiBase + '?ref=' + GH_BRANCH, { headers: headers });
+    if (!getResp.ok) {
+      var err = await getResp.json();
+      throw new Error('Lecture GitHub : ' + (err.message || getResp.status));
+    }
+    var getJson = await getResp.json();
+    var sha     = getJson.sha;
+    var current = JSON.parse(b64decode(getJson.content));
+
+    // 2 — Insérer ou remplacer
+    if (typeof EDIT_ID !== 'undefined' && EDIT_ID !== null) {
+      var idx = current.sessions.findIndex(function(x) { return x.id === EDIT_ID; });
+      if (idx !== -1) {
+        session.id = EDIT_ID;
+        current.sessions[idx] = session;
+        var li = SESSIONS_DATA.sessions.findIndex(function(x) { return x.id === EDIT_ID; });
+        if (li !== -1) SESSIONS_DATA.sessions[li] = session;
+      }
+    } else {
+      current.sessions.push(session);
+      SESSIONS_DATA.sessions.push(session);
+    }
+
+    // 3 — Pousser
+    setFeedback('⏳ Envoi sur GitHub…', 'loading');
+    var putBody = JSON.stringify({
+      message: 'Session #' + session.id + ' — ' + session.date,
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(current, null, 2)))),
+      sha:     sha,
+      branch:  GH_BRANCH
+    });
+    var putResp = await fetch(apiBase, { method: 'PUT', headers: headers, body: putBody });
+    if (!putResp.ok) {
+      var putErr = await putResp.json();
+      throw new Error('Écriture GitHub : ' + (putErr.message || putResp.status));
+    }
+
+    var actionMsg = (typeof EDIT_ID !== 'undefined' && EDIT_ID !== null)
+      ? '✓ Session #' + session.id + ' mise à jour.'
+      : '✓ Session #' + session.id + ' sauvegardée — GitHub Pages se met à jour dans ~30 sec.';
+    setFeedback(actionMsg, 'ok');
+    cancelEdit();
+    renderHistory();
+    renderRoutine();
+    drawChart();
+
+  } catch(e) {
+    setFeedback('✗ Erreur : ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↑ Sauvegarder sur GitHub';
+  }
+}
+
+function copyJSON() {
+  var text = document.getElementById('json-output').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('.btn-copy');
+    btn.textContent = '✓ Copié !';
+    setTimeout(function() { btn.textContent = 'Copier'; }, 2000);
+  });
+}
+
+// ── ÉDITION / SUPPRESSION ────────────────────────────────────────────────────
+var EDIT_ID   = null;
+var DELETE_ID = null;
+
+function editSession(id) {
+  var s = SESSIONS_DATA.sessions.find(function(x) { return x.id === id; });
+  if (!s) return;
+  EDIT_ID = id;
+
+  document.getElementById('f-date').value      = s.date;
+  document.getElementById('f-cafe').value      = s.cafe_id;
+  document.getElementById('f-in').value        = s.dose_in;
+  document.getElementById('f-out').value       = s.dose_out;
+  document.getElementById('f-temps').value     = s.temps_total;
+  document.getElementById('f-pression').value  = s.pression;
+  document.getElementById('f-moulin').value    = s.moulin || 'Eureka Mignon SD';
+  document.getElementById('f-reglage').value   = s.reglage_mouture || '';
+  document.getElementById('f-comment').value   = s.commentaire || '';
+  document.getElementById('f-onctuosite').value = s.scores.onctuosite;
+  document.getElementById('f-crema').value      = s.scores.crema;
+  document.getElementById('f-gout').value       = s.scores.gout;
+  document.getElementById('f-global').value     = s.scores.global;
+
+  if (s.temperature !== null && s.temperature !== undefined) {
+    document.getElementById('f-temp-mode').value = 'celsius';
+    toggleTempMode();
+    document.getElementById('f-temp').value = s.temperature;
+  } else {
+    document.getElementById('f-temp-mode').value = 'bouillante2mn';
+    toggleTempMode();
+  }
+  if (s.preinfusion_mode === 'premières gouttes') {
+    document.getElementById('f-preinf-mode').value = 'gouttes';
+    togglePreinfMode();
+    if (s.preinfusion) document.getElementById('f-preinf-gouttes').value = s.preinfusion;
+  } else {
+    document.getElementById('f-preinf-mode').value = 'secondes';
+    togglePreinfMode();
+    document.getElementById('f-preinf').value = s.preinfusion || 0;
+  }
+
+  document.getElementById('edit-session-id').textContent = '#' + id;
+  document.getElementById('edit-banner').classList.add('visible');
+  document.getElementById('btn-save-gh').textContent = '↑ Mettre à jour sur GitHub';
+
+  document.querySelectorAll('.section').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('session').classList.add('active');
+  document.querySelectorAll('nav button')[1].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  EDIT_ID = null;
+  document.getElementById('edit-banner').classList.remove('visible');
+  document.getElementById('btn-save-gh').textContent = '↑ Sauvegarder sur GitHub';
+}
+
+function askDelete(id) {
+  var s = SESSIONS_DATA.sessions.find(function(x) { return x.id === id; });
+  if (!s) return;
+  DELETE_ID = id;
+  var cafe = getCafe(s.cafe_id);
+  document.getElementById('modal-del-body').innerHTML =
+    '<strong>' + formatDate(s.date) + '</strong> · ' + (cafe ? cafe.nom : s.cafe_id) +
+    '<br>Global : ' + s.scores.global + '/20' +
+    (s.commentaire ? '<br><em>' + s.commentaire + '</em>' : '');
+  document.getElementById('modal-del').classList.add('visible');
+}
+
+function closeModal() {
+  DELETE_ID = null;
+  document.getElementById('modal-del').classList.remove('visible');
+}
+
+async function confirmDelete() {
+  if (!DELETE_ID) return;
+  var id = DELETE_ID;
+  closeModal();
+
+  var pat  = document.getElementById('github-pat').value.trim();
+  var repo = document.getElementById('github-repo').value.trim();
+  if (!pat || !repo) {
+    SESSIONS_DATA.sessions = SESSIONS_DATA.sessions.filter(function(x) { return x.id !== id; });
+    renderHistory(); renderRoutine(); drawChart();
+    return;
+  }
+
+  setFeedback('⏳ Suppression en cours…', 'loading');
+  var apiBase = 'https://api.github.com/repos/' + repo + '/contents/sessions.json';
+  var headers = { 'Authorization': 'token ' + pat, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+
+  try {
+    var getResp = await fetch(apiBase + '?ref=' + GH_BRANCH, { headers: headers });
+    if (!getResp.ok) throw new Error('Lecture GitHub : ' + getResp.status);
+    var getJson = await getResp.json();
+    var sha     = getJson.sha;
+    var current = JSON.parse(b64decode(getJson.content));
+
+    current.sessions = current.sessions.filter(function(x) { return x.id !== id; });
+    SESSIONS_DATA.sessions = current.sessions;
+
+    var putBody = JSON.stringify({
+      message: 'Suppression session #' + id,
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(current, null, 2)))),
+      sha: sha, branch: GH_BRANCH
+    });
+    var putResp = await fetch(apiBase, { method: 'PUT', headers: headers, body: putBody });
+    if (!putResp.ok) throw new Error('Écriture GitHub : ' + putResp.status);
+
+    document.querySelectorAll('.section').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('historique').classList.add('active');
+    document.querySelectorAll('nav button')[2].classList.add('active');
+    setFeedback('✓ Session #' + id + ' supprimée.', 'ok');
+    renderHistory(); renderRoutine(); drawChart();
+
+  } catch(e) {
+    setFeedback('✗ Erreur : ' + e.message, 'err');
+  }
+}
+
+// ── ③ HISTORIQUE ─────────────────────────────────────────────────────────────
+function renderHistory() {
+  var tbody = document.getElementById('history-body');
+  tbody.innerHTML = '';
+  var sessions = SESSIONS_DATA.sessions.slice().reverse();
+
+  sessions.forEach(function(s) {
+    var cafe = getCafe(s.cafe_id);
+    var tempTd;
+    if (s.temperature !== null && s.temperature !== undefined) {
+      tempTd = s.temperature + '°';
+    } else {
+      tempTd = s.temperature_note || '—';
+    }
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="td-date">' + formatDate(s.date) + '</td>' +
+      '<td class="td-cafe">' + (cafe ? cafe.nom : s.cafe_id) + '</td>' +
+      '<td style="font-family:DM Mono,monospace;font-size:0.75rem;white-space:nowrap">' + s.dose_in + '→' + s.dose_out + 'g</td>' +
+      '<td style="font-family:DM Mono,monospace;font-size:0.75rem">' + s.temps_total + 's</td>' +
+      '<td style="font-family:DM Mono,monospace;font-size:0.75rem">' + s.pression + '</td>' +
+      '<td style="font-family:DM Mono,monospace;font-size:0.72rem">' + tempTd + '</td>' +
+      '<td class="td-score" style="color:' + scoreColor(s.scores.onctuosite) + '">' + s.scores.onctuosite + '</td>' +
+      '<td class="td-score" style="color:' + scoreColor(s.scores.crema) + '">' + s.scores.crema + '</td>' +
+      '<td class="td-score" style="color:' + scoreColor(s.scores.gout) + '">' + s.scores.gout + '</td>' +
+      '<td class="td-score global" style="color:' + scoreColor(s.scores.global) + '">' + s.scores.global + '</td>' +
+      '<td class="td-comment">' + s.commentaire + '</td>' +
+      '<td style="text-align:center;white-space:nowrap">' +
+        '<button class="btn-action edit" onclick="editSession(' + s.id + ')" title="Modifier">✏</button> ' +
+        '<button class="btn-action del"  onclick="askDelete(' + s.id + ')"  title="Supprimer">🗑</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+// ── CHART (vanilla canvas) ────────────────────────────────────────────────────
+function drawChart() {
+  var canvas = document.getElementById('chart');
+  var ctx = canvas.getContext('2d');
+  var sessions = SESSIONS_DATA.sessions;
+
+  var W = canvas.parentElement.clientWidth - 24;
+  var H = 200;
+  canvas.width = W;
+  canvas.height = H;
+
+  var pad = { top: 20, right: 20, bottom: 30, left: 34 };
+  var iW = W - pad.left - pad.right;
+  var iH = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  if (!sessions.length) {
+    ctx.fillStyle = '#a0622a';
+    ctx.font = '13px Lato, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Pas encore assez de données', W/2, H/2);
+    return;
+  }
+
+  ctx.strokeStyle = 'rgba(61,32,6,0.2)';
+  ctx.lineWidth = 1;
+  [10, 13, 15, 17, 20].forEach(function(y) {
+    var yp = pad.top + iH - (y / 20) * iH;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, yp);
+    ctx.lineTo(pad.left + iW, yp);
+    ctx.stroke();
+    ctx.fillStyle = '#a0622a';
+    ctx.font = '9px DM Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(y, pad.left - 4, yp + 3);
+  });
+
+  var colors = { onctuosite: '#8b1a1a', crema: '#c8952a', gout: '#6b3a1f', global: '#1a0f00' };
+  var labels = { onctuosite: 'Onctuosité', crema: 'Crema', gout: 'Goût', global: 'Global' };
+  var xStep = sessions.length > 1 ? iW / (sessions.length - 1) : iW / 2;
+
+  Object.keys(colors).forEach(function(key) {
+    var color = colors[key];
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = key === 'global' ? 2.5 : 1.5;
+    ctx.setLineDash(key === 'global' ? [] : [4, 3]);
+    sessions.forEach(function(s, i) {
+      var x = pad.left + (sessions.length > 1 ? i * xStep : iW / 2);
+      var y = pad.top + iH - (s.scores[key] / 20) * iH;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    sessions.forEach(function(s, i) {
+      var x = pad.left + (sessions.length > 1 ? i * xStep : iW / 2);
+      var y = pad.top + iH - (s.scores[key] / 20) * iH;
+      ctx.beginPath();
+      ctx.arc(x, y, key === 'global' ? 4 : 3, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    });
+  });
+
+  var lx = pad.left;
+  Object.keys(colors).forEach(function(key) {
+    ctx.fillStyle = colors[key];
+    ctx.fillRect(lx, H - 12, 14, 3);
+    ctx.fillStyle = '#6b5040';
+    ctx.font = '9px DM Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(labels[key], lx + 18, H - 8);
+    lx += ctx.measureText(labels[key]).width + 36;
+  });
+
+  sessions.forEach(function(s, i) {
+    var x = pad.left + (sessions.length > 1 ? i * xStep : iW / 2);
+    var parts = s.date.split('-');
+    ctx.fillStyle = '#a0622a';
+    ctx.font = '8px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(parts[2] + '/' + parts[1], x, H - 16);
+  });
+}
+
+// ── ④ CAFÉS ──────────────────────────────────────────────────────────────────
+function renderCafes() {
+  var grid = document.getElementById('cafes-grid');
+  grid.innerHTML = '';
+
+  CAFES_DATA.cafes.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'cafe-card';
+
+    var pipes = '';
+    for (var i = 0; i < 10; i++) {
+      pipes += '<div class="intensite-pip ' + (i < c.intensite ? 'on' : '') + '"></div>';
+    }
+
+    var scoresHtml = ['bianca', 'robot', 'v60'].map(function(machine) {
+      var n = c.notes[machine];
+      if (!n || n.note === null) {
+        return '<div class="cafe-score-chip"><span class="machine">' + machine + '</span><span class="note" style="color:var(--text-light)">—</span></div>';
+      }
+      return '<div class="cafe-score-chip ' + machine + '"><span class="machine">' + machine + '</span><span class="note">' + n.note + '</span></div>';
+    }).join('');
+
+    var statutClass = c.statut === 'actuel' ? 'statut-actuel' : 'statut-tester';
+
+    div.innerHTML =
+      '<div class="cafe-card-header">' +
+        '<span class="torrefacteur">' + c.torrefacteur + '</span>' +
+        '<div class="nom">' + c.nom + '</div>' +
+      '</div>' +
+      '<div class="cafe-card-body">' +
+        '<span class="statut-badge ' + statutClass + '">' + c.statut + '</span>' +
+        '<div class="intensite-bar">' + pipes + '</div>' +
+        '<div class="cafe-meta">' + c.origine + '<br>Torréfaction ' + c.torrefaction + '<br>' + c.notes_torrefacteur + '</div>' +
+        '<div class="cafe-scores-row">' + scoresHtml + '</div>' +
+      '</div>';
+    grid.appendChild(div);
+  });
+}
+
+// ── INIT — fetch des JSON depuis GitHub ──────────────────────────────────────
+async function init() {
+  var loader = document.getElementById('app-loader');
+  var appMain = document.getElementById('app-main');
+
+  // Timestamp anti-cache : force le navigateur à relire depuis GitHub Pages
+  var ts = '?v=' + Date.now();
+
+  try {
+    var results = await Promise.all([
+      fetch('cafes.json' + ts).then(function(r) {
+        if (!r.ok) throw new Error('cafes.json introuvable');
+        return r.json();
+      }),
+      fetch('sessions.json' + ts).then(function(r) {
+        if (!r.ok) throw new Error('sessions.json introuvable');
+        return r.json();
+      })
+    ]);
+
+    CAFES_DATA    = results[0];
+    SESSIONS_DATA = results[1];
+
+    renderRoutine();
+    renderHistory();
+    renderCafes();
+    initForm();
+    loadGHConfig();
+
+    loader.style.display  = 'none';
+    appMain.style.display = '';
+
+  } catch(e) {
+    loader.innerHTML =
+      '<div style="text-align:center;padding:3rem;font-family:\'DM Mono\',monospace;font-size:0.8rem;color:#c8a070">' +
+      '⚠ Impossible de charger les données<br><br>' +
+      '<span style="color:#a0622a;font-size:0.7rem">' + e.message + '</span><br><br>' +
+      '<button onclick="init()" style="background:var(--brun);color:var(--creme);border:none;padding:0.6rem 1.4rem;border-radius:2px;cursor:pointer;font-family:\'DM Mono\',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase">Réessayer</button>' +
+      '</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

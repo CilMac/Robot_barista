@@ -43,6 +43,28 @@
         "gout": 17,
         "global": 16
       }
+    },
+    {
+      "id": 3,
+      "date": "2026-04-17",
+      "cafe_id": "vergnano-100-arabica",
+      "dose_in": 18,
+      "dose_out": 30,
+      "temps_total": 45,
+      "preinfusion_mode": "secondes",
+      "preinfusion": 10,
+      "pression": 6.5,
+      "temperature": 98,
+      "temperature_note": null,
+      "moulin": "Eureka Mignon SD",
+      "reglage_mouture": 5,
+      "commentaire": "Premier essai. Coulé vite, acide, buvable mais pas bu",
+      "scores": {
+        "onctuosite": 5,
+        "crema": 5,
+        "gout": 12,
+        "global": 12
+      }
     }
   ]
 }

@@ -21,6 +21,28 @@
         "gout": 16,
         "global": 16
       }
+    },
+    {
+      "id": 2,
+      "date": "2026-04-21",
+      "cafe_id": "vergnano-100-arabica",
+      "dose_in": 18,
+      "dose_out": 23,
+      "temps_total": 30,
+      "preinfusion_mode": "premières gouttes",
+      "preinfusion": null,
+      "pression": 6.5,
+      "temperature": null,
+      "temperature_note": "eau bouillante après 2 mn",
+      "moulin": "Eureka Mignon SD",
+      "reglage_mouture": 4,
+      "commentaire": "Dur sur  les bras quand moins chaud, mais meilleur ",
+      "scores": {
+        "onctuosite": 12,
+        "crema": 14,
+        "gout": 17,
+        "global": 16
+      }
     }
   ]
 }

@@ -67,28 +67,6 @@
       }
     },
     {
-      "id": 4,
-      "date": "2026-04-20",
-      "cafe_id": "vergnano-100-arabica",
-      "dose_in": 18,
-      "dose_out": 25,
-      "temps_total": 35,
-      "preinfusion_mode": "secondes",
-      "preinfusion": 10,
-      "pression": 6.5,
-      "temperature": null,
-      "temperature_note": "eau bouillante après 2 mn",
-      "moulin": "Eureka Mignon SD",
-      "reglage_mouture": 3,
-      "commentaire": "",
-      "scores": {
-        "onctuosite": 13,
-        "crema": 13,
-        "gout": 16,
-        "global": 16
-      }
-    },
-    {
       "id": 2,
       "date": "2026-04-21",
       "cafe_id": "vergnano-100-arabica",

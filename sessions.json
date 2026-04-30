@@ -65,6 +65,28 @@
         "gout": 12,
         "global": 12
       }
+    },
+    {
+      "id": 4,
+      "date": "2026-04-30",
+      "cafe_id": "",
+      "dose_in": 18,
+      "dose_out": 25,
+      "temps_extraction": 25,
+      "preinfusion_mode": "premières gouttes",
+      "preinfusion": null,
+      "pression": 7,
+      "temperature": 93,
+      "temperature_note": null,
+      "moulin": "Eureka Mignon SD",
+      "reglage_mouture": 3.5,
+      "commentaire": "\n",
+      "scores": {
+        "onctuosite": 15,
+        "crema": 15,
+        "gout": 16,
+        "global": 16
+      }
     }
   ]
 }
